@@ -1,11 +1,39 @@
 # 14-cloudkicker
-This project demonstrates the deployment of a secure, production-ready web application on a Google Cloud Platform (GCP) virtual machine. The core objective was to implement a "Defense in Depth" strategy by using Nginx as a reverse proxy to shield a Flask backend. The application features a terminal-styled security portal for identity creation and authentication, specifically designed for a Security Operations Center (SOC) environment.
+This project demonstrates the deployment of a secure web application on a Google Cloud Platform (GCP) virtual machine. The core objective was to implement a "Defense in Depth" strategy by using Nginx as a reverse proxy to shield a Flask backend.
 
-🔒 Security Architecture (Cloud Dweller Compliance)
-The deployment is architected to ensure the backend core is never directly exposed to the public internet, satisfying the Cloud Dweller badge requirements:
+🌐 Live Deployment
+Public IP: http://34.68.50.202
 
-Internal Binding: The Flask application is bound strictly to the loopback address 127.0.0.1:5000, ensuring it only accepts requests from the local VM.
+Access Protocol: Standard HTTP (Port 80)
 
-Reverse Proxy Shield: Nginx serves as the primary entry point on Port 80, securely forwarding authorized traffic to the internal Flask service.
+🔒 Security Confirmation (Cloud Dweller Compliance)
+To satisfy the Cloud Dweller badge conditions, the following network configuration has been verified:
 
-Firewall Hardening: The GCP Cloud Firewall is configured to permit only TCP Port 80 traffic (HTTP), while Port 5000 remains closed to all external networks.
+Flask Binding: The application is bound strictly to 127.0.0.1:5000. It is hidden from the public internet and only accessible locally by Nginx.
+
+Nginx Configuration: Nginx is listening on Port 80 and acting as the sole public gateway.
+
+Firewall Hardening: The GCP Cloud Firewall permits traffic only on Port 80. Direct external access to Port 5000 is blocked.
+
+🛠️ Technical Stack
+OS: Ubuntu 24.04 LTS (GCP e2-micro)
+
+Development Platform: Kali Linux
+
+Backend: Python 3 + Flask Framework
+
+Web Server: Nginx (Reverse Proxy)
+
+Environment: Python Virtual Environments (venv)
+
+📋 Key Features
+Identity Creation: A centered "Security Box" registration portal.
+
+Authentication: Multi-stage login process with flash notification logic.
+
+SOC Dashboard: A secure administrative view providing system status and session management.
+
+Audit Logging: Backend logging to track access grants and authentication failures.
+
+🏅 Accomplishments
+Cloud Dweller Badge: Successfully verified that the application is publicly accessible via the IP address without direct exposure of the Flask development server.
