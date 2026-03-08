@@ -1,0 +1,100 @@
+Creating free Linux VM (GCP)
+--------------------------------------------------
+STEP 1: GENERATE LOCAL SSH KEY
+
+> Command: ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa
+
+> Result: Generated RSA 4096 key pair for secure access.
+
+STEP 2: CLOUD VM PROVISIONING (GCP)
+
+> Provider: Google Cloud Platform (Free Tier)
+> Region: us-central1 (Iowa)
+> Machine Type: e2-micro (2 vCPU, 1 GB RAM)
+> OS: Ubuntu 24.04 LTS (Noble Numbat)
+> Disk: 30 GB Standard Persistent Disk
+> Security: Added public key from ~/.ssh/id_rsa.pub to GCP metadata.
+> Networking: Allowed HTTP (Port 80) and HTTPS (Port 443) traffic.
+
+After successful creation of the VM, we will get the External IP which we can use SSH for login from Kali Terminal.  
+
+STEP 3: SSH Login
+
+> Command: ssh -i ~/.ssh/id_rsa NeethuM@34.68.50.202
+
+> Result: Successfully established encrypted session to GCP VM.
+
+STEP 4: Prerequisites Installation on the VM
+
+> Tools installed: git, python3, python3-venv, python3-pip, nginx
+
+> Command: sudo apt update & sudo apt install -y git python3 python3-venv python3-pip nginx
+
+> Result: Installed the specified tools and verified using the command as below
+	>- Git: git --version; Result shows as git version 2.43.0 
+	>- Python: python3 --version; Result shows as Python 3.12.3 
+	>- Nginx: systemctl status nginx (Active/Running); Result shows as  nginx.service - A high performance web server and a reverse proxy server
+		Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)go
+		Active: active (running) since Sat 2026-03-07 08:11:23 UTC; 2h 44min ago
+
+STEP 5: Clone Task-12 repo on the VM (GIT Clone)
+
+> Cloning is the process of creating a local copy of a remote Git repository. 
+> Instead of just downloading a single file, cloning brings down the entire project structure, including all code, folders, and the history of changes made to it.
+>  Command: git clone https://github.com/neethumohanan28-star/12-fsd-flask.git
+> Directory: /home/NeethuM/12-fsd-flask
+> Action: Successfully cloned Flask application source code to the production VM.
+
+STEP 6: Creating virtual environment in the repo folder and Install requirements
+
+> Command: python3 -m venv venv
+> Activation: source venv/bin/activate
+> Dependency Management: Used pip to install requirements.txt 
+	>command: pip install -r requirements.txt
+> Libraries Installed: Flask, Gunicorn (verified via 'pip list')
+
+STEP 7: Run Flask only on localhost
+ Configured app.py with app.run(host='127.0.0.1', port=5000) to ensure it is hidden from the public internet. 
+
+> Command: python3 -m flask run --host=127.0.0.1 --port=5000
+> Output: * Running on http://127.0.0.1:5000
+> Result: Flask is successfully isolated to the VM's internal loopback. 
+> Security Note: Confirmed that the server is NOT listening on the public IP (0.0.0.0), meeting the "localhost only" requirement.
+
+And then started the application by the command: python3 app.py
+
+STEP 8: Configure Nginx as reverse proxy on port 80
+
+Created configuration file /etc/nginx/sites-available/flask_app with a proxy_pass pointing to http://127.0.0.1:5000.
+
+> Action: Created /etc/nginx/sites-available/flask_app.
+> Proxy Pass: Directed traffic from Port 80 to http://127.0.0.1:5000.
+>  Headers Configured: Host, X-Real-IP, X-Forwarded-For, X-Forwarded-Proto.
+> Site Activation: Linked config to sites-enabled and removed default listener.
+> Command: sudo systemctl restart nginx
+
+STEP 9: Open firewall rules for HTTP (port 80)
+
+> Objective: Implement the Principle of Least Privilege for network traffic.
+> Action: Enabled HTTP (Port 80) in the Cloud Console to allow public web traffic.
+>  Security Measure: Restricted Port 5000 to localhost only, preventing direct external access to the Flask development server.
+>  Verification: Public IP on Port 80 returns '200 OK'; Public IP on Port 5000 is blocked/filtered.
+
+STEP 10:  Access from your local browser 
+
+> Successfully navigated to http://34.68.50.202/ using a local web browser(Bing).
+> Application Interface Loaded: The page displayed a centered “Security Box” login interface.
+> Web Server Identified: The application is being served through Nginx, as observed from the page response.
+> Visual Evidence: Screenshot #2 captures the browser window showing the loaded login interface.
+
+STEP 11:  Verify full flow
+
+> Registration: Created a new identity; verified the "SUCCESS" flash message appeared.
+> Login: Authenticated successfully.
+> Dashboard: Reached the SOC Dashboard.
+> Screenshot #3 & #4: Captured the registration success and the final dashboard with the logged-in user identity.
+
+STEP 12: Cloud Dweller badge condition
+
+> Verification: The app is accessible at http://34.68.50.202/ (no port).
+> Security: Direct access via http://34.68.50.202:5000/ fails because Flask is bound to 127.0.0.1 and Port 5000 is closed at the GCP Firewall level.
